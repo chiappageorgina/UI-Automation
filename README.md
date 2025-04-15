@@ -28,8 +28,14 @@ cd tu-repo
 
 2. Instalá las dependencias:
 
+Asegurate de tener Node.js instalado:
+
+node -v  
+
+
 ```bash
 npm install
+
 ```
 
 ---

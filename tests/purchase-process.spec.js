@@ -1,58 +1,46 @@
-import { test, expect } from '@playwright/test';
+const { test, expect } = require('@playwright/test');
 const PurchasePage = require('../pages/PurchasePage');
 
 test('Usuario puede realizar una compra exitosa', async ({ page }) => {
   const purchasePage = new PurchasePage(page);
 
   await page.goto('https://www.demoblaze.com');
-  
-  await page.click(purchasePage.selectors.firstProduct);
-  await page.click(purchasePage.selectors.btnAddToCart);
-  await page.waitForEvent('dialog').then(dialog => dialog.accept());
- 
+  await expect(page).toHaveTitle('STORE');
 
-  await page.click(purchasePage.selectors.cartNavigationLink);
-  await page.waitForLoadState('domcontentloaded');
+  await purchasePage.clickPorduct();
+  await purchasePage.addToCart();
+  await purchasePage.goToCart();
+  await purchasePage.placeOrder();
 
-  await page.click(purchasePage.selectors.btnPlaceOrder);
+  await purchasePage.fillOrderForm({
+    name: 'Georgina Chiappa',
+    country: 'Uruguay',
+    city: 'Montevideo',
+    card: '1234 5678 9012 3456',
+    month: '04',
+    year: '2025',
+  });
 
+  await purchasePage.completePurchase();
 
-  await page.fill(purchasePage.selectors.inputName, 'Georgina Chiappa');
-  await page.fill(purchasePage.selectors.inputCountry, 'Uruguay');
-  await page.fill(purchasePage.selectors.inputCity, 'Montevideo');
-  await page.fill(purchasePage.selectors.inputCard, '1234 5678 9012 3456');
-  await page.fill(purchasePage.selectors.inputMonth, '04');
-  await page.fill(purchasePage.selectors.inputYear, '2025');
-
-  await page.click(purchasePage.selectors.btnPurchase);
-
-  const orderText = await page.locator(purchasePage.selectors.orderIdText).textContent();
+  const orderText = await purchasePage.getOrderIdText();
   expect(orderText).toContain('Id');
 
-  await page.click(purchasePage.selectors.btnOk);
+  await purchasePage.confirmPurchase();
 });
 
-
-//Test adicional 
 test('Test adicional - No se permite completar la compra sin ingresar datos', async ({ page }) => {
-    const purchasePage = new PurchasePage(page);
-  
-    await page.goto('https://www.demoblaze.com');
-  
-    await page.click(purchasePage.selectors.firstProduct);
-    await page.click(purchasePage.selectors.btnAddToCart);
-    await page.waitForEvent('dialog').then(dialog => dialog.accept());
-  
-    await page.click(purchasePage.selectors.cartNavigationLink);
-    await page.click(purchasePage.selectors.btnPlaceOrder);
-  
-    await page.click(purchasePage.selectors.btnPurchase);
-  
-    const modalStillOpen = await page.isVisible(purchasePage.selectors.inputName);
-    expect(modalStillOpen).toBe(true);
-  });
-  
+  const purchasePage = new PurchasePage(page);
 
+  await page.goto('https://www.demoblaze.com');
+  await expect(page).toHaveTitle('STORE');
 
+  await purchasePage.clickPorduct();
+  await purchasePage.addToCart();
+  await purchasePage.goToCart();
+  await purchasePage.placeOrder();
+  await purchasePage.completePurchase();
 
-
+  const modalStillOpen = await page.isVisible(purchasePage.selectors.inputName);
+  expect(modalStillOpen).toBe(true);
+});

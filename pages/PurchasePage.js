@@ -43,7 +43,7 @@ class PurchasePage {
     }
 
     async clickPorduct() {
-        await this.page.click(this.selector.firstProduct);
+        await this.page.click(this.selectors.firstProduct);
     }
   
     async completePurchase() {
